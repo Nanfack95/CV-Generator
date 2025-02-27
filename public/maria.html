@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur de CV - WebNova</title>
+  <!-- Intégration de Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Animation pour les sections */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Styles personnalisés */
+    textarea {
+      resize: none;
+    }
+
+    .form-section {
+      transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold text-center my-6 text-blue-600">Générateur de CV</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Formulaire de saisie -->
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <form id="cv-form">
+          <!-- Informations personnelles -->
+          <h2 class="text-xl font-semibold mb-4 text-blue-500">Informations personnelles</h2>
+          <div class="space-y-4">
+            <input type="text" id="nom" placeholder="Nom complet" class="w-full p-2 border outline-none bg-gray-100 rounded " required>
+            <input type="number" id="age" placeholder="Âge" min="18" max="65" class="w-full p-2 border outline-none bg-gray-100 rounded" required>
+            <input type="text" id="titre" placeholder="Titre du poste" class="w-full p-2 border outline-none bg-gray-100 rounded" required>
+            <textarea id="description" placeholder="Description" class="w-full p-2 border outline-none bg-gray-100 rounded" required></textarea>
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 border outline-none bg-gray-100 rounded" required>
+            <input type="tel" id="telephone" placeholder="Téléphone" class="w-full p-2 border outline-none bg-gray-100 rounded" required>
+            <input type="text" id="adresse" placeholder="Adresse" class="w-full p-2 border outline-none bg-gray-100 rounded" required>
+            <input type="file" id="photo" accept="image/*" class="w-full p-2 border outline-none bg-gray-100 rounded">
+          </div>
+
+          <!-- Expériences professionnelles -->
+          <h2 class="text-xl font-semibold mt-6 mb-4 text-blue-500">Expériences professionnelles</h2>
+          <div id="experiences">
+            <div class="experience mb-4 p-4 rounded-lg border bg-gray-50 form-section animate-fade-in">
+              <input type="text" placeholder="Nom de l'entreprise" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Poste occupé" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded-" required>
+              <input type="text" placeholder="Durée" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <textarea placeholder="Description des missions" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded-" required></textarea>
+              <div class="flex justify-end space-x-2">
+                <button type="button" class="supprimer-section bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">Supprimer</button>
+                <button type="button" class="terminer-section bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">Terminer</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="ajouter-experience" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter une expérience</button>
+
+          <!-- Formation -->
+          <h2 class="text-xl font-semibold mt-6 mb-4 text-blue-500">Formation</h2>
+          <div id="formations">
+            <div class="formation mb-4 p-4 rounded-lg border bg-gray-50 form-section animate-fade-in">
+              <input type="text" placeholder="Diplôme" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Établissement" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Année d'obtention" class="w-full p-2 mb-2 border outline-none bg-gray-100" required>
+              <div class="flex justify-end space-x-2">
+                <button type="button" class="supprimer-section bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">Supprimer</button>
+                <button type="button" class="terminer-section bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">Terminer</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="ajouter-formation" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter une formation</button>
+
+          <!-- Compétences -->
+          <h2 class="text-xl font-semibold mt-6 mb-4 text-blue-500">Compétences</h2>
+          <div id="competences">
+            <div class="competence mb-4 p-4 rounded-lg border bg-gray-50 form-section animate-fade-in">
+              <input type="text" placeholder="Compétence" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Niveau de maîtrise" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <div class="flex justify-end space-x-2">
+                <button type="button" class="supprimer-section bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">Supprimer</button>
+                <button type="button" class="terminer-section bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">Terminer</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="ajouter-competence" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter une compétence</button>
+
+          <!-- Centres d'intérêt -->
+          <h2 class="text-xl font-semibold mt-6 mb-4 text-blue-500">Centres d'intérêt</h2>
+          <textarea id="interets" placeholder="Loisirs et passions" class="w-full p-2 border outline-none bg-gray-100 rounded"></textarea>
+
+          <!-- Références -->
+          <h2 class="text-xl font-semibold mt-6 mb-4 text-blue-500">Références</h2>
+          <div id="references">
+            <div class="reference mb-4 p-4 rounded-lg border bg-gray-50 form-section animate-fade-in">
+              <input type="text" placeholder="Nom" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Poste" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Contact" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <div class="flex justify-end space-x-2">
+                <button type="button" class="supprimer-section bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">Supprimer</button>
+                <button type="button" class="terminer-section bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">Terminer</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="ajouter-reference" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter une référence</button>
+
+          <!-- Langues -->
+          <h2 class="text-xl font-semibold mt-6 mb-4 text-blue-500">Langues</h2>
+          <div id="langues">
+            <div class="langue mb-4 p-4 rounded-lg border bg-gray-50 form-section animate-fade-in">
+              <input type="text" placeholder="Langue" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <input type="text" placeholder="Niveau de compétence" class="w-full p-2 mb-2 border outline-none bg-gray-100 rounded" required>
+              <div class="flex justify-end space-x-2">
+                <button type="button" class="supprimer-section bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">Supprimer</button>
+                <button type="button" class="terminer-section bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">Terminer</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="ajouter-langue" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Ajouter une langue</button>
+
+          <!-- Bouton de soumission -->
+          <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 mt-6">Générer le CV</button>
+        </form>
+      </div>
+
+      <!-- Prévisualisation du CV -->
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4 text-blue-500">CV Prévisualisation</h2>
+        <div id="cv-content" class="space-y-4">
+          <!-- Contenu dynamique sera inséré ici -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Fonction pour dupliquer une section avec boutons "Supprimer" et "Terminer"
+      function dupliquerSection(sectionId, buttonId) {
+        const section = document.getElementById(sectionId);
+        const button = document.getElementById(buttonId);
+
+        button.addEventListener("click", function () {
+          // Cloner la dernière section
+          const nouvelleSection = section.lastElementChild.cloneNode(true);
+
+          // Réinitialiser les valeurs des champs
+          nouvelleSection.querySelectorAll("input, textarea").forEach((input) => {
+            input.value = "";
+          });
+
+          // Ajouter la nouvelle section au conteneur
+          section.appendChild(nouvelleSection);
+
+          // Gérer les boutons "Supprimer" et "Terminer"
+          const boutonSupprimer = nouvelleSection.querySelector(".supprimer-section");
+          const boutonTerminer = nouvelleSection.querySelector(".terminer-section");
+
+          boutonSupprimer.addEventListener("click", function () {
+            section.removeChild(nouvelleSection);
+          });
+
+          boutonTerminer.addEventListener("click", function () {
+            nouvelleSection.style.opacity = "0.5";
+            nouvelleSection.style.pointerEvents = "none";
+            boutonTerminer.disabled = true;
+          });
+        });
+      }
+
+      // Dupliquer les sections
+      dupliquerSection("experiences", "ajouter-experience");
+      dupliquerSection("formations", "ajouter-formation");
+      dupliquerSection("competences", "ajouter-competence");
+      dupliquerSection("references", "ajouter-reference");
+      dupliquerSection("langues", "ajouter-langue");
+
+      // Gestion de la prévisualisation en temps réel
+      const form = document.getElementById("cv-form");
+      const cvContent = document.getElementById("cv-content");
+
+      form.addEventListener("input", function () {
+        const formData = new FormData(form);
+        let html = `<h2 class="text-2xl font-bold">${formData.get("nom") || "Nom Complet"}</h2>`;
+        html += `<p class="text-gray-600"><strong>Titre :</strong> ${formData.get("titre") || "Titre du poste"}</p>`;
+        html += `<p class="text-gray-600"><strong>Description :</strong> ${formData.get("description") || "Description"}</p>`;
+        cvContent.innerHTML = html;
+      });
+
+      // Sauvegarde des données dans le local storage
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const data = {};
+        new FormData(form).forEach((value, key) => {
+          data[key] = value;
+        });
+        localStorage.setItem("cvData", JSON.stringify(data));
+        alert("CV sauvegardé avec succès !");
+      });
+
+      // Charger les données du local storage
+      const savedData = JSON.parse(localStorage.getItem("cvData"));
+      if (savedData) {
+        for (const key in savedData) {
+          const input = form.querySelector(`[name="${key}"]`);
+          if (input) input.value = savedData[key];
+        }
+      }
+    });
+  </script>
+</body>
+</html>
