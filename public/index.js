@@ -191,16 +191,16 @@ document.addEventListener("DOMContentLoaded", function () {
     remplirTousLesSelects();
 });
 
-function cacher(contentId, iconId){
+function cacher(contentId, iconId, forceShow = true) {
     const form = document.getElementById(contentId);
     const icon = document.getElementById(iconId);
 
-    if (form.style.maxHeight && form.style.maxHeight !== "0px") {
-        form.style.maxHeight = "0px"; // Cache avec une transition
-        icon.style.transform = "rotate(0deg)"; // Remet l'icône vers le bas
-    } else {
+    if (forceShow || (form.style.maxHeight && form.style.maxHeight !== "0px")) {
         form.style.maxHeight = form.scrollHeight + "px"; // Ajuste la hauteur réelle
         icon.style.transform = "rotate(180deg)"; // Fait tourner l'icône
+    } else {
+        form.style.maxHeight = "0px"; // Cache avec une transition
+        icon.style.transform = "rotate(0deg)"; // Remet l'icône vers le bas
     }
 }
 // --------------------------------------------------------------------------------------------------------------------
@@ -289,6 +289,9 @@ document.getElementById('addExp').addEventListener('click', function () {
         newExp.remove();
         updateExperiencesOnCV();
     });
+
+    // Forcer l'affichage du formulaire d'expérience
+    cacher('experienceForm', 'icon', true);
 });
 // Fonction pour mettre à jour l'affichage des expériences sur le CV
 function updateExperiencesOnCV() {
@@ -490,6 +493,7 @@ document.getElementById('addForm').addEventListener('click', function () {
         newForm.remove();
         updateFormationsOnCV();
     });
+    cacher('formationForm', 'iconFor', true);
 });
 // Fonction pour mettre à jour l'affichage des formations sur le CV
 function updateFormationsOnCV() {
@@ -555,6 +559,7 @@ document.getElementById('addComp').addEventListener('click', function () {
         newComp.remove();
         updateCompetencesOnCV();
     });
+    cacher('competenceForm', 'iconComp', true);
 });
 // Fonction pour mettre à jour l'affichage des compétences sur le CV
 function updateCompetencesOnCV() {
@@ -616,6 +621,7 @@ document.getElementById('addLoisir').addEventListener('click', function () {
         newInteret.remove();
         updateInteretsOnCV();
     });
+    cacher('interetForm', 'iconInteret', true);
 });
 // Fonction pour mettre à jour l'affichage des centres d'intérêt sur le CV
 function updateInteretsOnCV() {
@@ -677,6 +683,7 @@ document.getElementById('addRef').addEventListener('click', function () {
         newReference.remove();
         updateReferencesOnCV();
     });
+    cacher('referenceForm', 'iconRef', true);
 });
 // Fonction pour mettre à jour l'affichage des références sur le CV
 function updateReferencesOnCV() {
@@ -743,6 +750,7 @@ document.getElementById('addLang').addEventListener('click', function () {
         newLangue.remove();
         updateLanguesOnCV();
     });
+    cacher('langueForm', 'iconLang', true);
 });
 // Fonction pour mettre à jour l'affichage des langues sur le CV
 function updateLanguesOnCV() {
