@@ -1,7 +1,8 @@
-const photo = document.getElementById('photo');
+const photoInput = document.getElementById('photo');
 const nom = document.getElementById('nom');
 const titre = document.getElementById('titre');
 const age = document.getElementById('age');
+const ageError = document.createElement('div');
 const sexe = document.getElementById('sexe');
 const mail = document.getElementById('email');
 const tel = document.getElementById('tel');
@@ -9,7 +10,37 @@ const adresse = document.getElementById('adresse');
 const description = document.getElementById('description');
 const experienceForm = document.getElementById('experience');
 // -------------------------------------------------------------------------------------------------------------------------------------------------------
-photo.addEventListener('change', function(event) {
+const mois = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+];
+
+const anneeActuelle = new Date().getFullYear();
+const anneeMin = anneeActuelle - 50; // On affiche les 50 dernières années
+
+// Ajouter les années
+let annees = [];
+for (let i = anneeActuelle; i >= anneeMin; i--) {
+    annees.push(i);
+}
+
+function remplirSelect(select, options) {
+    options.forEach(option => {
+        const opt = document.createElement("option");
+        opt.value = option;
+        opt.textContent = option;
+        select.appendChild(opt);
+    });
+}
+
+function remplirTousLesSelects() {
+    document.querySelectorAll('select[placeholder="Mois de début"]').forEach(select => remplirSelect(select, mois));
+    document.querySelectorAll('select[placeholder="Mois de fin"]').forEach(select => remplirSelect(select, mois));
+    document.querySelectorAll('select[placeholder="Année de début"]').forEach(select => remplirSelect(select, annees));
+    document.querySelectorAll('select[placeholder="Année de fin"]').forEach(select => remplirSelect(select, annees));
+}
+// -------------------------------------------------------------------------------------------------------------------------------------------------------
+photoInput.addEventListener('change', function(event) {
     const container = document.getElementById('profil'); // Zone où afficher l'image en <img>
     const photoContainer = document.getElementById('photoContainer'); // Zone de fond
     const file = event.target.files[0]; // Récupérer le fichier
@@ -67,19 +98,26 @@ titre.addEventListener('input', function() {
     updateTextElement(titre, 'h2', 'text-lg text-blue-950 font-medium uppercase break-all', 'nameContainer');
 });
 
-age.addEventListener('input', function(){
+// verifier d'abord si l'age est un nombre et est compris entre 18 et 65
+age.addEventListener('input', function() {
+    const ageValue = parseInt(age.value, 10);
     const iage = document.getElementById('iage');
-    if(age.value.trim()){
+    const ageError = document.getElementById('ageError');
+
+    if (!isNaN(ageValue) && ageValue >= 18 && ageValue <= 65) {
+        age.style.borderColor = ''; // Reset border color
         iage.innerHTML = `
             <i class="fa-solid fa-calendar-check text-blue-950"></i>
-            <span class="text-[13px] break-all">${age.value} ans</span>
+            <span class="text-[13px] break-all">${ageValue} ans</span>
         `;
-
-    }else{
+        ageError.textContent = ''; // Clear error message
+    } else {
+        age.style.borderColor = 'red'; // Set border color to red
         iage.innerHTML = '';
+        ageError.textContent = 'Veuillez entrer un âge valide entre 18 et 65 ans.'; // Set error message
+        ageError.style.color = 'red'; // Set error message color to red
     }
 });
-
 
 sexe.addEventListener('input', function(){
     const isexe = document.getElementById('isexe');
@@ -93,15 +131,26 @@ sexe.addEventListener('input', function(){
     }
 });
 
-mail.addEventListener('input', function(){
+// verifier l'email qu'il soit au format des emails existants
+const emailError = document.createElement('div');
+emailError.id = 'emailError';
+mail.parentNode.insertBefore(emailError, mail.nextSibling);
+
+mail.addEventListener('input', function() {
     const imail = document.getElementById('imail');
-    if(mail.value.trim() !== ''){
+    const emailPattern = /@(gmail\.com|yahoo\.com|yahoo\.fr|outlook\.com|hotmail\.com)$/;
+    if (mail.value.trim() !== '' && emailPattern.test(mail.value)) {
         imail.innerHTML = `
-        <i class="fa-solid fa-envelope text-blue-950"></i>
-        <span class="text-[13px] break-all">${mail.value}</span>
-    `;
-    }else{
+            <i class="fa-solid fa-envelope text-blue-950"></i>
+            <span class="text-[13px] break-all">${mail.value}</span>
+        `;
+        mail.style.borderColor = ''; // Reset border color
+        emailError.textContent = ''; // Clear error message
+    } else {
         imail.innerHTML = '';
+        mail.style.borderColor = 'red'; // Set border color to red
+        emailError.textContent = 'Veuillez entrer une adresse email valide.'; // Set error message
+        emailError.style.color = 'red'; // Set error message color to red
     }
 });
 
@@ -144,34 +193,7 @@ description.addEventListener('input', function(){
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    const mois = [
-        "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-    ];
-    
-    const anneeActuelle = new Date().getFullYear();
-    const anneeMin = anneeActuelle - 50; // On affiche les 50 dernières années
-    
-    function remplirSelect(selectId, options) {
-        const select = document.querySelector(`select[placeholder="${selectId}"]`);
-        options.forEach((val, index) => {
-            const option = document.createElement("option");
-            option.textContent = val;
-            select.appendChild(option);
-        });
-    }
-
-    // Ajouter les mois
-    remplirSelect("Mois de début", mois);
-    remplirSelect("Mois de fin", mois);
-
-    // Ajouter les années
-    let annees = [];
-    for (let i = anneeActuelle; i >= anneeMin; i--) {
-        annees.push(i);
-    }
-    remplirSelect("Année de début", annees);
-    remplirSelect("Année de fin", annees);
+    remplirTousLesSelects();
 });
 
 function cacher(contentId, iconId){
@@ -206,252 +228,314 @@ document.getElementById('toggleFormation').addEventListener('click', function(){
     cacher('formationForm', 'iconFor');
 });
 // ------------------------------------------------------------------------------------------------------------------
-// Fonction pour afficher l'expérience sur le CV
-function addExperienceToCV(form, index) {
-    const experienceSection = document.getElementById('experienceCV'); // Récupérer la section contenant toutes les expériences
-    const expTitle = document.getElementById('experienceTitle');
-
-    if (!form) {
-        console.error("Aucun formulaire trouvé !");
-        return;
-    }
-
-    const inputs = form.querySelectorAll('input, select, textarea');
-    const isFilled = Array.from(inputs).some(input => input.value.trim() !== '');
-
-    // Afficher le titre "Expériences professionnelles" si ce n'est pas déjà fait
-    if (isFilled) {
-        expTitle.innerHTML = 'Expériences professionnelles';
-        expTitle.className = 'my-4  bg-white  text-[18px] p-2 text-blue-950 font-medium uppercase';
-    }
-
-    // Création ou mise à jour de l'affichage
-    let expDiv = document.getElementById(`experienceCV-${index}`);
-    if (!expDiv) {
-        expDiv = document.createElement('div');
-        expDiv.id = `experienceCV-${index}`;
-        experienceSection.appendChild(expDiv);
-    }
-
-    // Récupérer et afficher les valeurs des champs
-    const entreprise = form.querySelector("input[placeholder='Entreprise']")?.value || "";
-    const poste = form.querySelector("input[placeholder='Poste occupé']")?.value || "";
-    const moisDebut = form.querySelector("select[placeholder='Mois de début']")?.value || "";
-    const anneeDebut = form.querySelector("select[placeholder='Année de début']")?.value || "";
-    const moisFin = form.querySelector("select[placeholder='Mois de fin']")?.value || "";
-    const anneeFin = form.querySelector("select[placeholder='Année de fin']")?.value || "";
-    const description = form.querySelector("textarea[placeholder='Description des tâches']")?.value || "";
-
-    expDiv.innerHTML = `
-        <h3 class="text-[14px] font-medium" id="posteV">${poste}</h3>
-        <div class="flex items-center text-gray-500 text-[12px] space-x-1">
-            <h3 class="capitalize" id="entrepriseV">${entreprise} |</h3>
-            <p class="" id="dureV">${moisDebut} ${anneeDebut} - ${moisFin} ${anneeFin}</p>
-        </div>
-        <div class="w-full break-words text-[10px]" id="experienceText">${description}</div>
-    `;
-
-    if (!isFilled) {
-        expDiv.innerHTML = '';
-        expTitle.innerHTML = '';
-        expTitle.className = '';
-    }
-}
-// Ecouteur d'evement pour mettre jour l'experience
-window.addEventListener('DOMContentLoaded', function () {
-    // Sélectionner le premier formulaire d'expérience
-    const firstForm = document.getElementById('experience');
-    if (firstForm) {
-        const formId = "experience"; // ID unique du premier formulaire
-
-        // Ajouter un écouteur sur chaque champ du premier formulaire
-        firstForm.querySelectorAll('input, select, textarea').forEach(input => {
-            input.addEventListener('input', function () {
-                addExperienceToCV(firstForm, formId);
-            });
-        });
-
-        // Ajouter la première expérience au CV au cas où elle est déjà remplie
-        addExperienceToCV(firstForm, formId);
-    }
-});
-// Fonction pour supprimer une expérience du CV
-function removeExperienceFromCV(index) {
-    // Supprimer du formulaire
-    const formExp = document.getElementById(index); 
-    if (formExp) formExp.remove();
-
-    // Supprimer du CV
-    const experienceCV = document.getElementById(`experienceCV-${index}`);
-    if (experienceCV) experienceCV.remove();
-
-    // Verifier si d'autres expériences existent encore
-    const experienceSection = document.getElementById('experienceCV');
-    if (experienceSection.children.length === 0) {
-        const expTitle = document.getElementById('experienceTitle');
-        expTitle.innerHTML = ''; // Supprimer le titre si
-        expTitle.className = '';    
-    }
-}
-// fonction pour ajouter une exprerience
+// Ecouteur d'evenement pour ajouter une experience
 document.getElementById('addExp').addEventListener('click', function () {
     const experienceContainer = document.getElementById('experience');
-    const form = document.getElementById('form');
 
-    if (!form) {
-        console.error("Aucun modèle de formulaire trouvé !");
-        return;
-    }
+    // Création d'un nouveau formulaire d'expérience
+    const newExp = document.createElement('div');
+    newExp.className = "mb-4 border border-gray-200 py-6 px-6 space-y-4";
 
-    // Création d'un ID unique basé sur le temps
-    const uniqueId = "form-" + Date.now();
+    newExp.innerHTML = `
+        <div class="w-full">
+            <input type="text" placeholder="Entreprise" class="w-full p-2 outline-none bg-gray-100 rounded">
+        </div>
+        <div class="w-full">
+            <input type="text" placeholder="Poste occupé"  class="w-full p-2 outline-none bg-gray-100 rounded">
+        </div>
+        <div class="flex w-full space-x-6">
+            <div class="flex space-x-3 w-1/2">
+                <div class="w-1/2">
+                    <label class="block text-gray-700">Mois debut</label>
+                    <select placeholder="Mois de début" class="w-full p-2 outline-none text-gray-500 bg-gray-100 rounded">
+                        <option value="">Mois</option>
+                    </select>
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-gray-700">Annee debut</label>
+                    <select placeholder="Année de début" class=" px-2 text-gray-500 w-full p-2 outline-none bg-gray-100 rounded">
+                        <option value="">Année</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex space-x-3 w-1/2">
+                <div class="w-1/2">
+                    <label class="block text-gray-700">Mois fin</label>
+                    <select placeholder="Mois de fin" class=" px-2  w-full p-2 text-gray-500 outline-none bg-gray-100 rounded">
+                        <option value="">Mois</option>
+                    </select>
+                </div>
+                <div class="w-1/2">
+                    <label class="block text-gray-700">Annee fin</label>
+                    <select placeholder="Année de fin" class=" px-2  w-full text-gray-500 p-2 outline-none bg-gray-100 rounded">
+                        <option value="">Année</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="w-full">
+            <textarea type="text" placeholder="Description des tâches" class="w-full p-2 outline-none bg-gray-100 rounded"></textarea>
+        </div>
+        <div class="flex justify-end">
+            <button id="delExp" type="button" class="bg-red-500  text-white px-4 py-2 rounded cursor-pointer removeExp"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `;
 
-    // Cloner le formulaire
-    const newExp = form.cloneNode(true);
-    newExp.id = uniqueId;
-
-    // Reinisialiser les champs du formulaire cloné
-    newExp.querySelectorAll('input, select, textarea').forEach(input => input.value = '');
-
-    // Modifier l'ID du bouton de suppression pour chaque formulaire
-    const delButton = newExp.querySelector('#delExp');
-    delButton.style.background = 'red';
-    if (delButton) {
-        delButton.addEventListener('click', function () {
-            removeExperienceFromCV(uniqueId);
-        });
-    }
-
-    // Ajouter le formulaire cloné au DOM
     experienceContainer.appendChild(newExp);
 
-    // Ajouter l'expérience au CV
-    newExp.querySelectorAll('input, select, textarea').forEach(input => {
-        input.addEventListener('input', function () {
-            addExperienceToCV(newExp, uniqueId);
-        });
+    // Remplir les sélecteurs de mois et d'années pour le nouveau formulaire
+    remplirSelect(newExp.querySelector('select[placeholder="Mois de début"]'), mois);
+    remplirSelect(newExp.querySelector('select[placeholder="Mois de fin"]'), mois);
+    remplirSelect(newExp.querySelector('select[placeholder="Année de début"]'), annees);
+    remplirSelect(newExp.querySelector('select[placeholder="Année de fin"]'), annees);
+
+    // Suppression d'une expérience
+    newExp.querySelector('.removeExp').addEventListener('click', function () {
+        newExp.remove();
+        updateExperiencesOnCV();
     });
 });
+// Fonction pour mettre à jour l'affichage des expériences sur le CV
+function updateExperiencesOnCV() {
+    const experienceTitle = document.getElementById('experienceTitle');
+    const experienceCV = document.getElementById('experienceCV');
+
+    // Effacer l'affichage existant
+    experienceCV.innerHTML = '';
+
+    // Récupérer toutes les expériences saisies
+    const experiences = document.querySelectorAll("#experience > div");
+    let hasExperiences = false;
+
+    experiences.forEach((exp, index) => {
+        const entreprise = exp.querySelector("input[placeholder='Entreprise']")?.value.trim();
+        const poste = exp.querySelector("input[placeholder='Poste occupé']")?.value.trim();
+        const moisDebut = exp.querySelector("select[placeholder='Mois de début']")?.value.trim();
+        const anneeDebut = exp.querySelector("select[placeholder='Année de début']")?.value.trim();
+        const moisFin = exp.querySelector("select[placeholder='Mois de fin']")?.value.trim();
+        const anneeFin = exp.querySelector("select[placeholder='Année de fin']")?.value.trim();
+        const description = exp.querySelector("textarea[placeholder='Description des tâches']")?.value.trim();
+
+        if (entreprise || poste || moisDebut || anneeDebut || moisFin || anneeFin || description) {
+            hasExperiences = true;
+            const expDiv = document.createElement('div');
+            expDiv.className = "p-2 border border-gray-300 mb-2";
+            expDiv.innerHTML = `
+                <h3 class="text-[14px] font-medium" id="posteV">${poste}</h3>
+                <div class="flex items-center text-gray-500 text-[12px] space-x-1">
+                    <h3 class="capitalize text-[12px]" id="entrepriseV">${entreprise} |</h3>
+                    <p class="text-[12px]" id="dureV">${moisDebut} ${anneeDebut} - ${moisFin} ${anneeFin}</p>
+                </div>
+                <div class="w-full break-words text-[10px]" id="experienceText">${description}</div>
+            `;      
+            experienceCV.appendChild(expDiv);
+        }
+    });
+
+    // Afficher ou masquer le titre "Expériences professionnelles"
+    if (hasExperiences) {
+        experienceTitle.innerHTML = 'Expériences professionnelles';
+        experienceTitle.className = 'my-4  bg-white  text-[18px] p-2 text-blue-950 font-medium uppercase';
+    } else {
+        experienceTitle.innerHTML = '';
+        experienceTitle.className = '';
+    }
+}
+// Écouteur d'événement pour mettre à jour le CV en direct
+document.getElementById('experience').addEventListener('input', updateExperiencesOnCV);
+// ----------------------------------------------------------------------------------------------------------------------
+// Fonction pour afficher l'expérience sur le CV
+// function addExperienceToCV(form, index) {
+//     const experienceSection = document.getElementById('experienceCV'); // Récupérer la section contenant toutes les expériences
+//     const expTitle = document.getElementById('experienceTitle');
+
+//     if (!form) {
+//         console.error("Aucun formulaire trouvé !");
+//         return;
+//     }
+
+//     const inputs = form.querySelectorAll('input, select, textarea');
+//     const isFilled = Array.from(inputs).some(input => input.value.trim() !== '');
+
+//     // Afficher le titre "Expériences professionnelles" si ce n'est pas déjà fait
+//     if (isFilled) {
+//         expTitle.innerHTML = 'Expériences professionnelles';
+//         expTitle.className = 'my-4  bg-white  text-[18px] p-2 text-blue-950 font-medium uppercase';
+//     }
+
+//     // Création ou mise à jour de l'affichage
+//     let expDiv = document.getElementById(`experienceCV-${index}`);
+//     if (!expDiv) {
+//         expDiv = document.createElement('div');
+//         expDiv.id = `experienceCV-${index}`;
+//         experienceSection.appendChild(expDiv);
+//     }
+
+//     // Récupérer et afficher les valeurs des champs
+//     const entreprise = form.querySelector("input[placeholder='Entreprise']")?.value || "";
+//     const poste = form.querySelector("input[placeholder='Poste occupé']")?.value || "";
+//     const moisDebut = form.querySelector("select[placeholder='Mois de début']")?.value || "";
+//     const anneeDebut = form.querySelector("select[placeholder='Année de début']")?.value || "";
+//     const moisFin = form.querySelector("select[placeholder='Mois de fin']")?.value || "";
+//     const anneeFin = form.querySelector("select[placeholder='Année de fin']")?.value || "";
+//     const description = form.querySelector("textarea[placeholder='Description des tâches']")?.value || "";
+
+//     expDiv.innerHTML = `
+//         <h3 class="text-[14px] font-medium" id="posteV">${poste}</h3>
+//         <div class="flex items-center text-gray-500 text-[12px] space-x-1">
+//             <h3 class="capitalize" id="entrepriseV">${entreprise} |</h3>
+//             <p class="" id="dureV">${moisDebut} ${anneeDebut} - ${moisFin} ${anneeFin}</p>
+//         </div>
+//         <div class="w-full break-words text-[10px]" id="experienceText">${description}</div>
+//     `;
+
+//     if (!isFilled) {
+//         expDiv.innerHTML = '';
+//         expTitle.innerHTML = '';
+//         expTitle.className = '';
+//     }
+// }
+// Ecouteur d'evement pour mettre jour l'experience
+// window.addEventListener('DOMContentLoaded', function () {
+//     // Sélectionner le premier formulaire d'expérience
+//     const firstForm = document.getElementById('experience');
+//     if (firstForm) {
+//         const formId = "experience"; // ID unique du premier formulaire
+
+//         // Ajouter un écouteur sur chaque champ du premier formulaire
+//         firstForm.querySelectorAll('input, select, textarea').forEach(input => {
+//             input.addEventListener('input', function () {
+//                 addExperienceToCV(firstForm, formId);
+//             });
+//         });
+
+//         // Ajouter la première expérience au CV au cas où elle est déjà remplie
+//         addExperienceToCV(firstForm, formId);
+//     }
+// });
+// Fonction pour supprimer une expérience du CV
+// function removeExperienceFromCV(index) {
+//     // Supprimer du formulaire
+//     const formExp = document.getElementById(index); 
+//     if (formExp) formExp.remove();
+
+//     // Supprimer du CV
+//     const experienceCV = document.getElementById(`experienceCV-${index}`);
+//     if (experienceCV) experienceCV.remove();
+
+//     // Verifier si d'autres expériences existent encore
+//     const experienceSection = document.getElementById('experienceCV');
+//     if (experienceSection.children.length === 0) {
+//         const expTitle = document.getElementById('experienceTitle');
+//         expTitle.innerHTML = ''; // Supprimer le titre si
+//         expTitle.className = '';    
+//     }
+// }
+// fonction pour ajouter une exprerience
+// document.getElementById('addExp').addEventListener('click', function () {
+//     const experienceContainer = document.getElementById('experience');
+//     const form = document.getElementById('form');
+
+//     if (!form) {
+//         console.error("Aucun modèle de formulaire trouvé !");
+//         return;
+//     }
+
+//     // Création d'un ID unique basé sur le temps
+//     const uniqueId = "form-" + Date.now();
+
+//     // Cloner le formulaire
+//     const newExp = form.cloneNode(true);
+//     newExp.id = uniqueId;
+
+//     // Reinisialiser les champs du formulaire cloné
+//     newExp.querySelectorAll('input, select, textarea').forEach(input => input.value = '');
+
+//     // Modifier l'ID du bouton de suppression pour chaque formulaire
+//     const delButton = newExp.querySelector('#delExp');
+//     delButton.style.background = 'red';
+//     if (delButton) {
+//         delButton.addEventListener('click', function () {
+//             removeExperienceFromCV(uniqueId);
+//         });
+//     }
+
+//     // Ajouter le formulaire cloné au DOM
+//     experienceContainer.appendChild(newExp);
+
+//     // Ajouter l'expérience au CV
+//     newExp.querySelectorAll('input, select, textarea').forEach(input => {
+//         input.addEventListener('input', function () {
+//             addExperienceToCV(newExp, uniqueId);
+//         });
+//     });
+// });
 // ----------------------------------------------------------------------------------------------------------------------
 // Ecouteur d'evenement pour ajouter une formation
 document.getElementById('addForm').addEventListener('click', function () {
     const formationsContainer = document.getElementById('formations');
-    const firstForm = document.getElementById('train'); // Prend le premier formulaire comme modèle
 
-    if (!firstForm) {
-        console.error("Aucun modèle de formulaire trouvé !");
-        return;
-    }
+    // Création d'un nouveau formulaire de formation
+    const newForm = document.createElement('div');
+    newForm.className = "mb-4 border border-gray-200 py-6 px-6 space-y-4";
 
-    // Création d'un ID unique basé sur le temps
-    const uniqueId = "train-" + Date.now();
-
-    // Cloner le formulaire et attribuer un ID unique
-    const newForm = firstForm.cloneNode(true);
-    newForm.id = uniqueId;
-
-    // Réinitialiser les champs du formulaire cloné
-    newForm.querySelectorAll('input').forEach(input => input.value = '');
-
-    // Modifier l'ID du bouton de suppression pour chaque formulaire
-    const delButton = newForm.querySelector('#delForm');
-    delButton.style.background = 'red';
-    if (delButton) {
-        delButton.addEventListener('click', function () {
-            removeFormation(uniqueId);
-        });
-    }
-
-    // Ajouter le formulaire cloné au DOM
-    formationsContainer.appendChild(newForm);
-
-    // Ajouter la formation au CV
-    newForm.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', function () {
-            addFormationToCV(uniqueId, newForm);
-        });
-    });
-});
-// Fonction pour afficher la formation dans le CV
-function addFormationToCV(id, formElement) {
-    const formationCV = document.getElementById('formationCV');
-    const formTitle = document.getElementById('formationTitle');
-
-    if (!formElement) {
-        console.error(`Le formulaire avec l'ID ${id} n'existe pas.`);
-        return;
-    }
-
-    const inputs = document.getElementById('formations').querySelectorAll('input');
-    const isFilled = Array.from(inputs).some(input => input.value.trim() !== '');
-
-    // Afficher le titre "Formations" si ce n'est pas déjà fait
-    if(isFilled){
-        formTitle.innerHTML = 'Formations';
-        formTitle.className = 'my-4  bg-white  text-[18px] p-2 text-blue-950 font-medium uppercase';
-    }
-
-    let formDiv = document.getElementById(`formationCV-${id}`);
-    if (!formDiv) {
-        formDiv = document.createElement('div');
-        formDiv.id = `formationCV-${id}`;
-        formationCV.appendChild(formDiv);
-    }
-
-    // Récupérer et afficher les valeurs des champs
-    const diplome = formElement.querySelector('input[placeholder=\"Diplôme\"]')?.value || "";
-    const etablissement = formElement.querySelector("input[placeholder=\"Établissement\"]")?.value || "";
-    const anneeObtention = formElement.querySelector("input[placeholder=\"Année d'obtention\"]")?.value || "";
-
-    formDiv.innerHTML = `
-        <div class="p-2 border border-gray-300 mb-2">
-            <p><strong>${diplome}</strong> - ${etablissement}</p>
-            <p>Année d'obtention: ${anneeObtention}</p>
+    newForm.innerHTML = `
+        <input type="text" placeholder="Diplôme" class="w-full p-2 outline-none bg-gray-100 rounded" required>
+        <input type="text" placeholder="Établissement" class="w-full p-2 outline-none bg-gray-100 rounded" required>
+        <input type="text" placeholder="Année d'obtention" class="w-full p-2 outline-none bg-gray-100 rounded" required>
+        <div class="flex justify-end">
+            <button type="button" class="bg-red-500 text-white px-4 py-2 rounded cursor-pointer removeForm"><i class="fa-solid fa-trash"></i></button>
         </div>
     `;
 
-    if(!isFilled){
-        formDiv.innerHTML = '';
-        formTitle.innerHTML = '';
-        formTitle.className = '';
-    }
-}
-// Ecouteur d'evenement pour mettre a jour la formation
-document.addEventListener('DOMContentLoaded', function () {
-    // Sélectionner le premier formulaire existant avec l'ID "train"
-    const firstForm = document.getElementById("train");
-    if (firstForm) {
-        const formId = "train"; // ID unique du premier formulaire
+    formationsContainer.appendChild(newForm);
 
-        // Ajouter un écouteur sur chaque champ du premier formulaire
-        firstForm.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', function () {
-                addFormationToCV(formId, firstForm);
-            });
-        });
-
-        // Ajouter la première formation au CV au cas où elle est déjà remplie
-        addFormationToCV(formId, firstForm);
-    }
+    // Suppression d'une formation
+    newForm.querySelector('.removeForm').addEventListener('click', function () {
+        newForm.remove();
+        updateFormationsOnCV();
+    });
 });
-// Fonction pour supprimer une formation
-function removeFormation(id) {
-    // Supprimer du formulaire
-    const formExp = document.getElementById(id);
-    if (formExp) formExp.remove();
-
-    // Supprimer du CV
-    const formCV = document.getElementById(`formationCV-${id}`);
-    if (formCV) formCV.remove();
-
-    // Vérifier si d'autres formations existent encore
+// Fonction pour mettre à jour l'affichage des formations sur le CV
+function updateFormationsOnCV() {
+    const formationTitle = document.getElementById('formationTitle');
     const formationCV = document.getElementById('formationCV');
-    if (formationCV.children.length === 0) {
-        const formTitle = document.getElementById('formationTitle');
-        formTitle.innerHTML = ''; // Supprimer le titre si plus de formations
-        formTitle.className = '';
+
+    // Effacer l'affichage existant 
+    formationCV.innerHTML = '';
+
+    // Récupérer toutes les formations saisies
+    const formations = document.querySelectorAll("#formations > div");
+    let hasFormations = false;
+
+    formations.forEach((form, index) => {
+        const diplome = form.querySelector("input[placeholder='Diplôme']")?.value.trim();
+        const etablissement = form.querySelector("input[placeholder='Établissement']")?.value.trim();
+        const anneeObtention = form.querySelector("input[placeholder=\"Année d'obtention\"]")?.value.trim();
+
+        if (diplome || etablissement || anneeObtention) {
+            hasFormations = true;
+            const formDiv = document.createElement('div');
+            formDiv.className = "p-2 border border-gray-300 mb-2";
+            formDiv.innerHTML = `
+                <p><strong>${diplome}</strong> - ${etablissement}</p>
+                <p>Année d'obtention: ${anneeObtention}</p>
+            `;
+            formationCV.appendChild(formDiv);
+        }
+    });
+
+    // Afficher ou masquer le titre "Formations"
+    if (hasFormations) {
+        formationTitle.innerHTML = 'Formations';
+        formationTitle.className = 'my-4  bg-white  text-[18px] p-2 text-blue-950 font-medium uppercase';
+    } else {
+        formationTitle.innerHTML = '';
+        formationTitle.className = '';
     }
 }
+// Écouteur d'événement pour mettre à jour le CV en direct
+document.getElementById('formations').addEventListener('input', updateFormationsOnCV);  
 // ------------------------------------------------------------------------------------------------------------------------
 // Ecouteur d'evenement pour ajouter une competence
 document.getElementById('addComp').addEventListener('click', function () {
@@ -710,7 +794,7 @@ const cvName = document.getElementById('cvName');
 // Fonction pour sauvegarder les données du CV dans LocalStorage
 function saveCVData() {
     const cvData = {
-        photo: photo.src,
+        photo: document.getElementById('profil').querySelector('img')?.src || '',
         nom: nom.value,
         titre: titre.value,
         age: age.value,
@@ -801,14 +885,11 @@ function saveCVData() {
     // const cvName = document.getElementById('cvName');
     localStorage.setItem('cvData', JSON.stringify(cvData));
 }
-
-// Fonction pour charger les données depuis LocalStorage
+// Fonction pour charger les données du CV depuis LocalStorage
 function loadCVData() {
     const cvData = JSON.parse(localStorage.getItem('cvData'));
     if (!cvData) return;
 
-    // Charger les données dans le formulaire
-    photo.src = cvData.photo;
     nom.value = cvData.nom;
     titre.value = cvData.titre;
     age.value = cvData.age;
@@ -818,21 +899,92 @@ function loadCVData() {
     adresse.value = cvData.adresse;
     description.value = cvData.description;
 
+    // Mettre à jour les éléments du CV avec les valeurs chargées
+    updateTextElement(nom, 'h1', 'text-3xl text-blue-950 font-bold uppercase', 'nameContainer');
+    updateTextElement(titre, 'h2', 'text-lg text-blue-950 font-medium uppercase break-all', 'nameContainer');
+    document.getElementById('iage').innerHTML = age.value.trim() ? `<i class="fa-solid fa-calendar-check text-blue-950"></i><span class="text-[13px] break-all">${age.value} ans</span>` : '';
+    document.getElementById('isexe').innerHTML = sexe.value.trim() ? `<i class="fa-solid fa-venus-mars text-blue-950"></i><span class="text-[13px] break-all">${sexe.value}</span>` : '';
+    document.getElementById('imail').innerHTML = mail.value.trim() ? `<i class="fa-solid fa-envelope text-blue-950"></i><span class="text-[13px] break-all">${mail.value}</span>` : '';
+    document.getElementById('itel').innerHTML = tel.value.trim() ? `<i class="fa-solid fa-phone-flip text-blue-950"></i><span class="text-[13px] break-all">${tel.value}</span>` : '';
+    document.getElementById('iadresse').innerHTML = adresse.value.trim() ? `<i class="fa-solid fa-house text-blue-950"></i><span class="text-[13px] break-all">${adresse.value}</span>` : '';
+    document.getElementById('profilText').textContent = description.value.trim() ? description.value : '';
+    document.getElementById('protext').className = description.value.trim() ? 'mb-2 bg-white p-2 text-[18px] text-blue-950 font-medium uppercase' : '';
+    document.getElementById('protext').innerHTML = description.value.trim() ? 'profil' : '';
+
     // Charger les expériences professionnelles
     cvData.experience.forEach(exp => {
-        const form = document.getElementById('form');
-        const clone = form.cloneNode(true);
-        const inputs = clone.querySelectorAll('input, select, textarea');
-        inputs[0].value = exp.entreprise;
-        inputs[1].value = exp.poste;
-        inputs[2].value = exp.moisDebut;
-        inputs[3].value = exp.anneeDebut;
-        inputs[4].value = exp.moisFin;
-        inputs[5].value = exp.anneeFin;
-        inputs[6].value = exp.description;
-        document.getElementById('experience').appendChild(clone);
-    }
-    );
+        const newExp = document.createElement('div');
+        newExp.className = "w-full border border-gray-200 py-6 px-6 space-y-4";
+        newExp.innerHTML = `
+            <div class="w-full">
+                <input type="text" placeholder="Entreprise" class="w-full p-2 outline-none bg-gray-100 rounded" value="${exp.entreprise}">
+            </div>
+            <div class="w-full">
+                <input type="text" placeholder="Poste occupé" class="w-full p-2 outline-none bg-gray-100 rounded" value="${exp.poste}">
+            </div>
+            <div class="flex w-full space-x-6">
+                <div class="flex space-x-3 w-1/2">
+                    <div class="w-1/2">
+                        <label class="block text-gray-700">Mois début</label>
+                        <select placeholder="Mois de début" class="w-full p-2 outline-none text-gray-500 bg-gray-100 rounded">
+                            <option value="">Mois</option>
+                            <!-- Ajouter les options de mois ici -->
+                        </select>
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-gray-700">Année début</label>
+                        <select placeholder="Année de début" class="px-2 text-gray-500 w-full p-2 outline-none bg-gray-100 rounded">
+                            <option value="">Année</option>
+                            <!-- Ajouter les options d'années ici -->
+                        </select>
+                    </div>
+                </div>
+                <div class="flex space-x-3 w-1/2">
+                    <div class="w-1/2">
+                        <label class="block text-gray-700">Mois fin</label>
+                        <select placeholder="Mois de fin" class="px-2 w-full p-2 text-gray-500 outline-none bg-gray-100 rounded">
+                            <option value="">Mois</option>
+                            <!-- Ajouter les options de mois ici -->
+                        </select>
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-gray-700">Année fin</label>
+                        <select placeholder="Année de fin" class="px-2 w-full text-gray-500 p-2 outline-none bg-gray-100 rounded">
+                            <option value="">Année</option>
+                            <!-- Ajouter les options d'années ici -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full">
+                <textarea type="text" placeholder="Description des tâches" class="w-full p-2 outline-none bg-gray-100 rounded">${exp.description}</textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" class="bg-red-500 text-white px-4 py-2 rounded cursor-pointer removeExp"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        `;
+        document.getElementById('experience').appendChild(newExp);
+
+
+        // Suppression d'une expérience
+        newExp.querySelector('.removeExp').addEventListener('click', function () {
+            newExp.remove();
+            updateExperiencesOnCV(); 
+        }
+        );
+
+        // Remplir les sélecteurs de mois et d'années pour le nouveau formulaire
+        remplirSelect(newExp.querySelector('select[placeholder="Mois de début"]'), mois);
+        remplirSelect(newExp.querySelector('select[placeholder="Mois de fin"]'), mois);
+        remplirSelect(newExp.querySelector('select[placeholder="Année de début"]'), annees);
+        remplirSelect(newExp.querySelector('select[placeholder="Année de fin"]'), annees);
+
+        // Définir les valeurs des sélecteurs
+        newExp.querySelector('select[placeholder="Mois de début"]').value = exp.moisDebut;
+        newExp.querySelector('select[placeholder="Mois de fin"]').value = exp.moisFin;
+        newExp.querySelector('select[placeholder="Année de début"]').value = exp.anneeDebut;
+        newExp.querySelector('select[placeholder="Année de fin"]').value = exp.anneeFin;
+    });
 
     // Charger les formations
     cvData.formation.forEach(form => {
@@ -847,6 +999,12 @@ function loadCVData() {
             </div>
         `;
         document.getElementById('formations').appendChild(newForm);
+
+        // Suppression d'une formation
+        newForm.querySelector('.removeFormation').addEventListener('click', function () {
+            newForm.remove();
+            updateFormationsOnCV();
+        });
     });
 
     // Charger les compétences
@@ -874,6 +1032,12 @@ function loadCVData() {
             </div>
         `;
         document.getElementById('interet').appendChild(newInteret);
+
+        // Suppression d'un centre d'intérêt
+        newInteret.querySelector('.removeInteret').addEventListener('click', function () {
+            newInteret.remove();
+            updateInteretsOnCV();
+        });
     });
 
     // Charger les références
@@ -889,6 +1053,12 @@ function loadCVData() {
             </div>
         `;
         document.getElementById('references').appendChild(newReference);
+
+        // Suppression d'une référence
+        newReference.querySelector('.removeReference').addEventListener('click', function () {
+            newReference.remove();
+            updateReferencesOnCV();
+        });
     });
 
     // Charger les langues
@@ -903,6 +1073,12 @@ function loadCVData() {
             </div>
         `;
         document.getElementById('langues').appendChild(newLangue);
+
+        // Suppression d'une langue
+        newLangue.querySelector('.removeLangue').addEventListener('click', function () {
+            newLangue.remove();
+            updateLanguesOnCV();
+        });
     });
 
     // Mettre à jour les sections du CV
@@ -910,60 +1086,48 @@ function loadCVData() {
     updateInteretsOnCV();
     updateReferencesOnCV();
     updateLanguesOnCV();
-    addExperienceToCV(document.getElementById('form'), 'form');
-    addFormationToCV(document.getElementById('train'), 'train');
+    updateExperiencesOnCV();
+    updateFormationsOnCV();
 }
 
 // Sauvegarde automatique à chaque modification
-// document.addEventListener('input', saveCVData);
+document.addEventListener('input', saveCVData);
 
 // Charger les données au chargement de la page
 document.addEventListener('DOMContentLoaded', loadCVData);
 
 document.getElementById('download').addEventListener('click', function () {
-    let valid = true;
-    inputs = document.querySelectorAll('input,textarea,select').forEach(input => {
-        if(input.value.trim() === ''){
-            valid = false;
+
+    // verifier si tout les champs du formulaire ne sont pas vides
+    const inputs = document.querySelectorAll('input, textarea');
+    let isEmpty = false;
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            isEmpty = true;
         }
     });
 
-    if (!valid) {
-        alert('❌ Veuillez remplir tous les champs obligatoires !');
-        return; // On arrête l'exécution ici si un champ est vide
+    if (isEmpty) {
+        alert("⚠️ Veuillez remplir tous les champs du formulaire avant de télécharger votre CV.");
+        return;
     }
-    
+
     saveCVData();
     alert("✅ Votre CV a été enregistré !");
 
-        const element = document.getElementById('cvContainer');
-        const opt = {
-            margin: 0,
-            filename: `${cvName.value}`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-    
-        html2pdf().set(opt).from(element).save()
-            .then(() => {
-                // Restaurer le bouton
-                button.innerHTML = originalText;
-                button.disabled = false;
-            })
-            .catch(err => {
-                console.error('Erreur lors de la génération du PDF:', err);
-                button.innerHTML = originalText;
-                button.disabled = false;
-                alert('Une erreur est survenue lors de la génération du PDF.');
-            });
+    const element = document.getElementById('cvContainer');
+    const opt = {
+        margin: 0,
+        filename: `${cvName.value}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save()
+    .catch(err => {
+        console.error('Erreur lors de la génération du PDF:', err);
+        alert('Une erreur est survenue lors de la génération du PDF.');
     });
-
-document.getElementById('print').addEventListener('click', function () {
-    let cvContent = document.getElementById('cvContainer').innerHTML;
-    let originalContent = document.body.innerHTML;
-
-    document.body.innerHTML = cvContent; // Remplace tout le contenu par le CV
-    window.print(); // Ouvre l'interface d'impression
-    document.body.innerHTML = originalContent; 
 });
+// --------------------------------------------------------------------------------------------------------------------------
