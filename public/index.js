@@ -131,11 +131,6 @@ sexe.addEventListener('input', function(){
     }
 });
 
-// verifier l'email qu'il soit au format des emails existants
-const emailError = document.createElement('div');
-emailError.id = 'emailError';
-mail.parentNode.insertBefore(emailError, mail.nextSibling);
-
 mail.addEventListener('input', function() {
     const imail = document.getElementById('imail');
     const emailPattern = /@(gmail\.com|yahoo\.com|yahoo\.fr|outlook\.com|hotmail\.com)$/;
